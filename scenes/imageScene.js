@@ -2,10 +2,8 @@ const { Composer } = require("telegraf");
 const Telegraf = require("telegraf");
 const WizardScene = require("telegraf/scenes/wizard");
 const bot = new Telegraf("5561811963:AAFV83oL535KmiZOHwkSIybgiwmoCAxUCxQ");
-const User = require("../userModel");
+const User = require("../models/userModel");
 const { mainId } = require("../index");
-
-
 
 const step1 = (ctx) => {
   ctx.reply(

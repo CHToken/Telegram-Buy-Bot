@@ -2,6 +2,6 @@ module.exports = {
   validateToken: (tokenAddress) =>
     axios({
       method: "GET",
-      url: `https://api.etherscan.io/api?module=account&action=txlist&address=${tokenAddress}&apikey=112R9MIZ97GI3M7UBVNAR34HYIGEW4RK8W`,
+      url: `https://api.etherscan.io/api?module=account&action=txlist&address=${tokenAddress}&apikey=6CYPKK8GJK1QW4IR3XAVNAZWZKYSZ6NZ8R`,
     }),
 };
