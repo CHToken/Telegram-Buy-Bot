@@ -156,7 +156,7 @@ class Transaction {
                         ) {
                           spentEth = "N/A";
                         } else {
-                          spentEth = (spentUsd / ethValue).toFixed(5);
+                          spentEth = (spentUsd / ethValue).toFixed(4);
                         }
 
                         let buyerBalance =
@@ -173,12 +173,12 @@ class Transaction {
                           if (buyerPOS <= 0) {
                             position = "Not a Holder";
                           } else {
-                            position = buyerPOS.toFixed(5) + "%" + " ⬆";
+                            position = buyerPOS.toFixed(4) + "%" + " ⬆️";
                           }
                         }
 
                         let walletVal = balance;
-                        let ethWalletVal = (walletVal / 10 ** 18).toFixed(5);
+                        let ethWalletVal = (walletVal / 10 ** 18).toFixed(4);
                         let mcap = price * total_supply;
                         let stepVal = spentUsd;
                         let stepEVal = Math.floor(stepVal / stepp);
@@ -207,7 +207,7 @@ ${emojiRepeat}\n
                         })}) 
 🔼 Position: ${position} 
 🛒 Total Buys: # ${total_txs} 
-💲 Price: $${priceNum.toFixed(10)} 
+💲 Price: $${priceNum.toFixed(8)} 
 📈 MKTCap: $ ${mcapfin} 
 🐳 Whale: ${whaleStats}\n 
 <a href="https://etherscan.io/tx/${id}"><b>🔼 TX</b></a> | <a href="https://dextools.io/app/ether/pair-explorer/${pair}"><b>📊 Chart</b></a>
