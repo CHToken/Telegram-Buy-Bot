@@ -215,7 +215,7 @@ class Transaction {
                         ) {
                           spentEth = "N/A";
                         } else {
-                          spentEth = (spentUsd / ethValue).toFixed(5);
+                          spentEth = (spentUsd / ethValue).toFixed(4);
                         }
 
                     let buyerBalance =
@@ -264,16 +264,16 @@ class Transaction {
 
                     if (whaleStats) {
                       if (whaleee?.contract_name === "Ethereum") {
-                        whaleStatsText = `Ethereum 🐋 ${ethWalletVal} ETH ($${quote.toLocaleString(
-                          undefined,
-                          { maximumFractionDigits: 0 }
-                        )})`;
+                          whaleStatsText = `Ethereum 🐋 ${ethWalletVal} ETH ($${quote.toLocaleString(
+                              undefined,
+                              { maximumFractionDigits: 0 }
+                          )})`;
                       } else {
-                        whaleStatsText = `<a href="https://etherscan.io/address/${machala}" target="_blank">${whaleee?.contract_name}</a> 🐋 ${formattedWhaleeeBalance}`;
+                          whaleStatsText = `<a href="https://etherscan.io/address/${machala}" target="_blank">${whaleee?.contract_name}</a> 🐋 ${formattedWhaleeeBalance}`;
                       }
-                    } else {
+                  } else {
                       whaleStatsText = "Not a whale";
-                    }
+                  }                  
                     console.log(
                       `Ethereum Whale Balance: ${whaleeeBalance} ${whaleee?.contract_name}`
                     );
@@ -291,7 +291,7 @@ ${emojiRepeat}
 🛒 Total Buys: # ${total_txs} 
 💲 Price: $${priceNum.toFixed(8)} 
 📈 MKTCap: $ ${mcapfin} 
-🐳 Whale: ${whaleStats}\n 
+🐳 Whale: ${whaleStatsText}\n 
 <a href="https://etherscan.io/tx/${id}"><b>🔼 TX</b></a> | <a href="https://dextools.io/app/ether/pair-explorer/${pair}"><b>📊 Chart</b></a>
 <a href="${Tele}"><b>👫 Telegram</b></a> | <a href="https://app.uniswap.org/#/swap?&chain=mainnet&use=v2&outputCurrency=${token}"><b>🦄 Uniswap</b></a>
                       `);
