@@ -206,20 +206,17 @@ class Transaction {
                       }
                     );
 
-                    // Calculate the ETH spent in Wei
-                    let spentEthWei = "N/A";
-
-                    if (typeof ethValue === "number" && !isNaN(ethValue) && ethValue !== 0) {
-                      spentEthWei = (spentUsd / ethValue) * 10 ** 18;
-                    }
-
-                    let spentEth = "N/A";
-                    if (typeof spentEthWei !== "string") {
-                      spentEth = (spentEthWei / 10 ** 18).toFixed(3);
-                    }
-                    // Display the spent ETH in the console log
-                    console.log(`Spent ETH in Wei: ${spentEthWei}`);
-                    console.log(`Spent ETH in Ether: ${spentEth}`);
+                        let spentEth;
+                        if (
+                          typeof ethValue !== "number" ||
+                          isNaN(ethValue) ||
+                          ethValue === 0 ||
+                          isNaN(spentUsd)
+                        ) {
+                          spentEth = "N/A";
+                        } else {
+                          spentEth = (spentUsd / ethValue).toFixed(5);
+                        }
 
                     let buyerBalance =
                       Number(buyerBal) / 10 ** sent[0]?.decimals || 0;
@@ -228,22 +225,22 @@ class Transaction {
                     let buyerPOS = (buyerBalance / circulatingSupply) * 100;
                     buyerPOS = isNaN(buyerPOS) ? 0 : buyerPOS;
 
-                    let position;
-                    if (total_txs === 1) {
-                      position = "🆕 New Holder";
-                    } else {
-                      if (buyerPOS <= 0) {
-                        position = "Not a Holder";
-                      } else {
-                        position = buyerPOS.toFixed(4) + "%" + " 🔝";
-                      }
-                    }
+                        let position;
+                        if (total_txs === 1) {
+                          position = "🆕 New Holder";
+                        } else {
+                          if (buyerPOS <= 0) {
+                            position = "Not a Holder";
+                          } else {
+                            position = buyerPOS.toFixed(5) + "%" + " ⬆";
+                          }
+                        }
 
-                    let walletVal = balance;
-                    let ethWalletVal = (walletVal / 10 ** 18).toFixed(3);
-                    let mcap = price * total_supply;
-                    let stepVal = spentUsd;
-                    let stepEVal = Math.floor(stepVal / stepp);
+                        let walletVal = balance;
+                        let ethWalletVal = (walletVal / 10 ** 18).toFixed(5);
+                        let mcap = price * total_supply;
+                        let stepVal = spentUsd;
+                        let stepEVal = Math.floor(stepVal / stepp);
 
                     let mcapSum = Number(mcap).toLocaleString(undefined, {
                       maximumFractionDigits: 0,
@@ -289,13 +286,13 @@ ${emojiRepeat}
 💲 Spent: <b>${spentEth}</b> ETH ($${spentUsd})
 🛒 Bag: <b>${realSum} ${sent[0]?.symbol || "Unknown"}</b>
 😎 Buyers Fund: ${ethWalletVal} ETH ($${quote.toLocaleString(undefined, {
-                      maximumFractionDigits: 0,
-                    })})
-🔼 Position: ${position}
-🛒 Total Buys: # ${total_txs}
-💲 Price: $${priceNum.toFixed(6)}
-📈 MKTCap: $ ${mcapfin}
-🐳 Whale: ${whaleStatsText}\n
+                          maximumFractionDigits: 2,
+                        })}) 
+🔼 Position: ${position} 
+🛒 Total Buys: # ${total_txs} 
+💲 Price: $${priceNum.toFixed(10)} 
+📈 MKTCap: $ ${mcapfin} 
+🐳 Whale: ${whaleStats}\n 
 <a href="https://etherscan.io/tx/${id}"><b>🔼 TX</b></a> | <a href="https://dextools.io/app/ether/pair-explorer/${pair}"><b>📊 Chart</b></a>
 <a href="${Tele}"><b>👫 Telegram</b></a> | <a href="https://app.uniswap.org/#/swap?&chain=mainnet&use=v2&outputCurrency=${token}"><b>🦄 Uniswap</b></a>
                       `);
