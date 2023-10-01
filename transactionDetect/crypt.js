@@ -45,7 +45,7 @@ function formatBalance(balance) {
     const formattedBalance = (balance / 1000).toFixed(2) + "K";
     return `${formattedBalance}`;
   } else {
-    return `${balance.toFixed(4)}`;
+    return `${balance.toFixed(8)}`;
   }
 }
 
@@ -290,7 +290,7 @@ ${emojiRepeat}
                         })}) 
 🔼 Position: ${position} 
 🛒 Total Buys: # ${total_txs} 
-💲 Price: $${priceNum.toFixed(10)} 
+💲 Price: $${priceNum.toFixed(8)} 
 📈 MKTCap: $ ${mcapfin} 
 🐳 Whale: ${whaleStats}\n 
 <a href="https://etherscan.io/tx/${id}"><b>🔼 TX</b></a> | <a href="https://dextools.io/app/ether/pair-explorer/${pair}"><b>📊 Chart</b></a>
@@ -304,7 +304,6 @@ ${emojiRepeat}
             );
             // Send the transaction to Telegram
             const transactionId = latestTransaction.id;
-            // Update the user's processedTransactions array with the new transactionId
             await User.findOneAndUpdate(
               { chatId },
               {
