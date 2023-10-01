@@ -5,6 +5,7 @@ class Bot {
   constructor(bot) {
     this.bot = bot;
     this.transaction = new Transaction();
+    this.processedTransactions = new Set();
   }
 
   sendMessages(message, chatId, image) {
@@ -38,16 +39,24 @@ class Bot {
 
   async watchChanges() {
     try {
+      console.log("Entering watchChanges");
       const users = await User.find();
       for (const user of users) {
-        await this.transaction.getTransaction((message) =>
-          this.sendMessages(message, user.chatId, user.mImage)
-        );
+        console.log(`Processing chatId: ${user.chatId}`);
+        if (!this.processedTransactions.has(user.chatId)) {
+          await this.transaction.getTransaction((message) => {
+            this.sendMessages(message, user.chatId, user.mImage);
+            this.processedTransactions.add(user.chatId);
+          });
+        }
       }
+      // Clear the set after processing all users
+      this.processedTransactions.clear();
     } catch (error) {
       console.error(error);
     }
   }
+  
 }
 
 module.exports = Bot;

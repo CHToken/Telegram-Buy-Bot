@@ -15,9 +15,11 @@ const userSchema = new mongoose.Schema({
   emoji: { type: String },
   mEnable: { type: Boolean },
   mImage: { type: String },
+  mGif: { type: String },
   timeStamp: { type: Number },
   hash: { type: String },
   groupId: { type: String },
+  processedTransactions: [{ type: String }],
 });
 const User = mongoose.model("user", userSchema);
 

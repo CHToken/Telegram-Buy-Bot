@@ -59,34 +59,27 @@ bot.command(["addtoken", "buildsettings"], async (ctx, next) => {
   if (ctx.chat && ctx.chat.id && ctx.update.message) {
     let admi = ctx.update.message.chat._admins;
     groupNameee.unshift(ctx.chat.title);
-    // console.log(ctx.chat.id);
-    // console.log(admi);
-
     // Check if the group already exists in the database
     const existingGroup = await Group.findOne({ chatId: ctx.chat.id });
-
     // Update the existingGroup and newUser creation logic
     if (existingGroup) {
       // Update the admin list in the existing group document
       existingGroup.adminList = admi;
       await existingGroup.save();
-
       // Check if a user document already exists for this group
       const existingUser = await User.findOne({ chatId: ctx.chat.id });
       if (!existingUser) {
         // Create a new User document
         const newUser = await User.create({
           chatId: ctx.chat.id,
-          step: 5,
-          cSupply: 0,
-          emoji: "💎",
+          step: 10,
+          cSupply: "",
+          emoji: "💚",
           mEnable: false,
           mImage: "Not Set",
-          timeStamp: 0,
-          hash: "nill",
+          timeStamp: "",
+          hash: "",
         });
-
-        // console.log(newUser);
       }
     } else {
       // Create a new Group document
@@ -95,24 +88,20 @@ bot.command(["addtoken", "buildsettings"], async (ctx, next) => {
         groupName: ctx.chat.title,
         updateId: 0,
         adminList: admi,
+        assignedToken: "",
       });
-
-      // console.log(newGroup);
 
       // Create a new User document
       const newUser = await User.create({
         chatId: ctx.chat.id,
-        step: 5,
-        cSupply: 0,
-        emoji: "💎",
-        mEnable: false,
-        mImage: "Not Set",
-        timeStamp: 0,
-        hash: "nill",
-        assignedToken: null, // Added assignedToken field
+        step: "",
+        cSupply: "",
+        emoji: "",
+        mEnable: "",
+        mImage: "",
+        timeStamp: "",
+        hash: "",
       });
-
-      // console.log(newUser);
     }
   } else {
     return next();
@@ -134,63 +123,61 @@ bot.command(["addtoken", "buildsettings"], async (ctx, next) => {
   bot.telegram.sendMessage(ctx.chat.id, text.welcome, test_welcome);
 });
 
-// Handle the token delete confirmation callback
-bot.action("confirmDelete", async (ctx) => {
+// handler for deleting token
+bot.action("tokenDelete", async (ctx) => {
   try {
-    const chatId = ctx.chat.id;
-    const user = await User.findOne({ chatId });
-
-    if (!user || !user.ethAddress || !user.ethAddress[0].name) {
-      return ctx.reply("Token not found for this group.");
+    if (mainId[0] == undefined) {
+      return ctx.reply("Click The Link from your group again");
     }
-    const tokenName = user.ethAddress[0].name;
-    const deletedUser = await User.findOneAndRemove({
-      "ethAddress.name": tokenName,
+    const user = await User.findOne({ chatId: mainId[0] });
+    if (!user) {
+      return ctx.reply("User not found.");
+    }
+    if (!user.ethAddress || user.ethAddress.length === 0) {
+      return ctx.reply("No token registered for this group.");
+    }
+
+    // Ask for confirmation
+    ctx.reply("Are you sure you want to delete your token?", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yes",
+              callback_data: "confirmTokenDelete",
+            },
+            {
+              text: "No",
+              callback_data: "cancelTokenDelete",
+            },
+          ],
+        ],
+      },
     });
 
-    if (deletedUser) {
-      ctx.reply("Token has been deleted successfully.");
-    } else {
-      ctx.reply("Error deleting token");
-    }
   } catch (error) {
-    console.error(error);
-    ctx.reply("Error occurred while processing the request.");
+    console.error("Error deleting token:", error);
+    ctx.reply("An error occurred while deleting the token.");
   }
 });
 
-// Token Delete
-bot.action("tokenDelete", (ctx) => {
-  if (mainId[0] == undefined) {
-    return ctx.reply("Click The Link from your group again");
-  } else {
-    // Retrieve the user's data including the ethAddress field
-    User.findOne({ chatId: mainId[0] }, "ethAddress", (error, data) => {
-      if (error) {
-        console.log(error);
-        return ctx.reply("Error retrieving token information");
-      }
-
-      // Check if data and ethAddress exist before proceeding
-      if (!data || !data.ethAddress || !data.ethAddress[0].name) {
-        return ctx.reply("Token not found for this group.");
-      }
-
-      const tokenName = data.ethAddress[0].name;
-
-      // Display the confirmation message
-      ctx.replyWithMarkdown(
-        `Are you sure you want to delete the *${tokenName}*?\nClick Yes to Delete\nClick No to Cancel`,
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "Yes", callback_data: "confirmDelete" }],
-              [{ text: "No", callback_data: "cancel" }],
-            ],
-          },
-        }
-      );
-    });
+// Add handlers for confirmation actions
+bot.action("confirmTokenDelete", async (ctx) => {
+  try {
+    // Delete the token
+    const user = await User.findOne({ chatId: mainId[0] });
+    if (!user) {
+      return ctx.reply("User not found.");
+    }
+    if (!user.ethAddress || user.ethAddress.length === 0) {
+      return ctx.reply("No token registered for this group.");
+    }
+    user.ethAddress = [];
+    await user.save();
+    ctx.reply("Token deleted successfully.");
+  } catch (error) {
+    console.error("Error deleting token:", error);
+    ctx.reply("An error occurred while deleting the token.");
   }
 });
 
@@ -649,7 +636,7 @@ bot.action("eth", function (ctx) {
 });
 let ethList = ["e-Uniswap", "e-UniswapV3", "e-Sushiswap", "e-Shibaswap"];
 
-// Token Stage
+// tokenVerify scene
 const tokenVerify = new WizardScene(
   "token",
   (ctx, next) => {
@@ -675,14 +662,13 @@ const tokenVerify = new WizardScene(
           ctx.reply("Address is not valid");
           ctx.scene.leave();
         } else {
-          // Update the user's token information
+          // Update the user's token information, including cSupply
           const updateData = {
             ethAddress: {
               name: pairs[0].baseToken.name,
               token_Address: pairs[0].baseToken.address,
               pair_Address: pairs[0].pairAddress,
             },
-            // Update the cSupply value here
             cSupply: pairs[0].circulatingSupply || 0,
           };
 
@@ -1058,6 +1044,11 @@ bot.action("tsave", (ctx) => {
   ctx.reply(
     "Token Successfully added. To change settings please click on the link from within your Telegram group."
   );
+});
+// Token Delete
+bot.action("cancelTokenDelete", (ctx) => {
+  ctx.deleteMessage();
+  ctx.reply("Token deletion canceled.");
 });
 
 const init = async () => {
