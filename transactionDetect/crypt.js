@@ -274,7 +274,6 @@ class Transaction {
                     } else {
                       whaleStatsText = "Not a whale";
                     }
-
                     console.log(
                       `Ethereum Whale Balance: ${whaleeeBalance} ${whaleee?.contract_name}`
                     );
