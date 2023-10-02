@@ -30,12 +30,34 @@ async function getTokenBalance(tokenAddress, walletAddress) {
   }
 }
 
+async function getTokenPrice(tokenAddress) {
+  try {
+    if (!tokenAddress) {
+      console.error("Token address is undefined or null");
+      return 0;
+    }
+
+    const response = await axios.get(
+      `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${tokenAddress}&vs_currencies=usd`
+    );
+
+    const price = response.data[tokenAddress.toLowerCase()].usd;
+    return price;
+  } catch (error) {
+    console.error("Error fetching token price:", error);
+    return 0;
+  }
+}
+
 // Function to format balance
 function formatBalance(balance) {
-  if (balance >= 1000000000000) {
+  if (balance >= 1000000000000000) {
+    const formattedBalance = (balance / 1000000000000).toFixed(2) + "Quadrillion";
+    return `${formattedBalance}`;
+  } else if (balance >= 1000000000000) {
     const formattedBalance = (balance / 1000000000).toFixed(2) + "Trillion";
     return `${formattedBalance}`;
-  }else if (balance >= 1000000000) {
+  } else if (balance >= 1000000000) {
     const formattedBalance = (balance / 1000000000).toFixed(2) + "Billion";
     return `${formattedBalance}`;
   } else if (balance >= 1000000) {
@@ -181,6 +203,8 @@ class Transaction {
                   );
                 }
 
+                const tokenPrice = await getTokenPrice(machala);
+
                 if (received.length === 1) {
                   if (received[0]?.name === "Wrapped Ether") {
                     let value1 = Number(sent[0]?.value) || 0;
@@ -202,21 +226,28 @@ class Transaction {
                     let spentUsd = (sumation * priceNum).toLocaleString(
                       undefined,
                       {
-                        maximumFractionDigits: 2,
+                        maximumFractionDigits: 0,
                       }
                     );
 
-                        let spentEth;
-                        if (
-                          typeof ethValue !== "number" ||
-                          isNaN(ethValue) ||
-                          ethValue === 0 ||
-                          isNaN(spentUsd)
-                        ) {
-                          spentEth = "N/A";
-                        } else {
-                          spentEth = (spentUsd / ethValue).toFixed(4);
-                        }
+                    // Calculate spentEth
+                    let spentEth;
+                    if (
+                      typeof ethValue === "number" &&
+                      !isNaN(ethValue) &&
+                      ethValue !== 0 &&
+                      typeof sumation === "number" && 
+                      !isNaN(sumation)
+                    ) {
+                      // Sum of values in USD
+                      let totalUsd = sumation * priceNum;
+                      // Convert total USD to ETH
+                      spentEth = (totalUsd / ethValue).toFixed(4);
+                    } else {
+                      spentEth = "N/A";
+                    }
+                    // Remove commas from spentUsd
+                    spentUsd = spentUsd.replace(/,/g, "");
 
                     let buyerBalance =
                       Number(buyerBal) / 10 ** sent[0]?.decimals || 0;
@@ -232,12 +263,12 @@ class Transaction {
                           if (buyerPOS <= 0) {
                             position = "Not a Holder";
                           } else {
-                            position = buyerPOS.toFixed(5) + "%" + " ⬆";
+                            position = buyerPOS.toFixed(4) + "%" + " ⬆";
                           }
                         }
 
                         let walletVal = balance;
-                        let ethWalletVal = (walletVal / 10 ** 18).toFixed(5);
+                        let ethWalletVal = (walletVal / 10 ** 18).toFixed(4);
                         let mcap = price * total_supply;
                         let stepVal = spentUsd;
                         let stepEVal = Math.floor(stepVal / stepp);
@@ -254,33 +285,28 @@ class Transaction {
 
                     let whaleStats = whaleee ? true : false;
 
-                    let formattedWhaleeeBalance = "";
-                    if (whaleStats) {
-                      formattedWhaleeeBalance =
-                        formatBalance(whaleeeBalance);
-                    }
-
                     let whaleStatsText = "";
 
                     if (whaleStats) {
                       if (whaleee?.contract_name === "Ethereum") {
-                          whaleStatsText = `Ethereum 🐋 ${ethWalletVal} ETH ($${quote.toLocaleString(
-                              undefined,
-                              { maximumFractionDigits: 0 }
-                          )})`;
+                        whaleStatsText = `Ethereum 🐋 ${ethWalletVal} ETH ($${quote.toLocaleString(
+                          undefined,
+                          { maximumFractionDigits: 0 }
+                        )})`;
                       } else {
-                          whaleStatsText = `<a href="https://etherscan.io/address/${machala}" target="_blank">${whaleee?.contract_name}</a> 🐋 ${formattedWhaleeeBalance}`;
+                        const formattedWhaleeeBalance = formatBalance(whaleeeBalance);
+                        whaleStatsText = `<a href="https://etherscan.io/address/${machala}" target="_blank">${whaleee?.contract_name}</a> 🐋 ${formattedWhaleeeBalance} (Price: $${tokenPrice})`;
                       }
-                  } else {
+                    } else {
                       whaleStatsText = "Not a whale";
-                  }                  
+                    }
                     console.log(
                       `Ethereum Whale Balance: ${whaleeeBalance} ${whaleee?.contract_name}`
                     );
 
-                    callback(`
+callback(`
 <a href="${Tele}" target="_blank">${ContractName}</a> <b>Buy!</b>
-${emojiRepeat}
+<pre>${emojiRepeat}</pre>
 
 💲 Spent: <b>${spentEth}</b> ETH ($${spentUsd})
 🛒 Bag: <b>${realSum} ${sent[0]?.symbol || "Unknown"}</b>

@@ -31,6 +31,7 @@
     "telegraf-mongodb-middleware": "^2.0.1",
     "telegraf-session-mongodb": "^2.0.2",
     "telegraf-session-mongoose": "^2.0.6",
+    "uniswap-api": "^1.4.8",
     "web3": "^4.1.2"
   }
 }
